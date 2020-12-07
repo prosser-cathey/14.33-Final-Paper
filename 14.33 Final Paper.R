@@ -40,11 +40,27 @@ dim(data[data$Lower==90,])
 # Figure
 library("ggplot2")
 aggregate(data$Cooperation, by = list(Difference = data$Diff), mean)
-ggplot(aggregate(data$Cooperation, by = list(Difference = data$Diff), mean),
-aes(x=Difference,y=x)) + 
+ggplot(aggregate(data$Cooperation, by = list(Difference = data$Diff), mean), aes(x=Difference,y=x)) + 
   geom_point() + 
   theme_classic() +
   xlab("Difference in Bounds") +
   ylab("Cooperation Percentage") +
   ggtitle("Cooperation vs. Difference in Bounds") +
   scale_y_continuous( limits=c(0, 1))
+# Total Distribution of Submissions for each group
+ggplot(data = data, aes(x=Answer)) + 
+  geom_histogram(bins = 100) + 
+  theme_classic() +
+  xlab("Submission") +
+  ylab("Count of Submissions") +
+  ggtitle("Distribution of Submissions by Difference in Bounds") +
+  facet_wrap(vars(Diff))
+# Running regression only on those who paid attention
+# Adding number of words column
+data$Words <- sapply(gregexpr("\\S+", data$Explanation), length)
+# Regression
+lou2 <- lm(Cooperation ~ Diff, data = data[data$Words>5,])
+lout3 <- lm(Cooperation ~ Diff, data = data[data$Words>20,])
+# Outputting to Latex
+stargazer(lout, lou2, lout3, column.labels = c("All", "5 Words", "20 Words"), notes = c("This table presents the results of \\regressing cooperation on the difference in \\bounds. Note that there seems to be no effect, \\even among groups who paid close attention."))
+summary(lout2)
